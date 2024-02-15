@@ -3,24 +3,22 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { auth } from '@clerk/nextjs';
+import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
-    }
+export async function POST(req: NextApiRequest) {
 
     try {
-        const userId = auth();
+        const { userId } = auth();
         const { name } = req.body;
 
         if (!userId) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return new NextResponse('Unauthorized', { status : 401 });
         }
 
         if (!name) {
-            return res.status(400).json({ message: 'Name is required' });
+            return new NextResponse('Name is required', { status : 400 });
         }
 
         const store = await prisma.store.create({
@@ -30,9 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
         });
 
-        return res.status(201).json(store);
+        return NextResponse.json(store);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return new NextResponse('Internal server error', { status : 500});
     }
 }
