@@ -1,17 +1,19 @@
 // pages/api/store.ts
 
-import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import { auth } from '@clerk/nextjs';
-import { NextResponse } from 'next/server';
+import { auth } from "@clerk/nextjs";
+import { NextRequest, NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextApiRequest) {
-
+export async function POST(req: Request) {
     try {
+
+        const body = await req.json();
+        console.log(body)
+
         const { userId } = auth();
-        const { name } = req.body;
+        const name = body;
 
         if (!userId) {
             return new NextResponse('Unauthorized', { status : 401 });
@@ -33,4 +35,5 @@ export async function POST(req: NextApiRequest) {
         console.error(error);
         return new NextResponse('Internal server error', { status : 500});
     }
+    
 }
